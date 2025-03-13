@@ -1,11 +1,12 @@
-FROM golang:1.23.4
+FROM golang:1.23.4 as builder
 
 WORKDIR /app
 COPY . .
+
 RUN go mod tidy
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o coffeeshop_app .
 
-RUN go build -o coffeeshop .
+FROM scratch
+COPY --from=builder /app ./
 
-EXPOSE 8080
-
-CMD ["./coffeeshop"]
+CMD ["/coffeeshop_app"]
